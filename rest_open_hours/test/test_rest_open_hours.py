@@ -6,7 +6,7 @@ from rest_open_hours import database
 
 class TestRestOpenHours(unittest.TestCase):
 
-    def test_rest_open_hours(self):
+    def test_parse_csv_into_table(self):
         open_hours.parse_csv_into_table()
 
     def test_open_csv(self):
@@ -32,7 +32,12 @@ class TestRestOpenHours(unittest.TestCase):
         self.assertEqual(res, "23:00:00")
 
     def test_query(self):
-        open_hours.query_open_restaurants(datetime.today())
+        res = open_hours.list_open_restaurants(datetime.today())
+        self.assertTrue(len(res) > 0)
+
+    def test_query_open(self):
+        res = open_hours.query_open_hours()
+        self.assertTrue(len(res) > 0)
 
     def test_model_insert(self):
         model = database.OpenHours()
@@ -41,10 +46,10 @@ class TestRestOpenHours(unittest.TestCase):
         database.session.commit()
         open_h = open_hours.convert_open_range("Mon-Sun 11:30 am - 9 pm")
         for hours in open_h:
-            model.name = "test"
+            model.name = 'test'
             model.restaurant = restaurant.id
-            model.week_day_begin = hours['week_day_begin'].lower()
-            model.week_day_end = hours['week_day_end'].lower()
+            model.week_day_begin = open_hours.week_day[hours['week_day_begin'].lower()]
+            model.week_day_end = open_hours.week_day[hours['week_day_end'].lower()]
             model.time_begin = open_hours.convert_to_time(hours['time_begin'])
             model.time_end = open_hours.convert_to_time(hours['time_end'])
             database.session.add(model)
