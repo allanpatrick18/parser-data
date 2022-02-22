@@ -6,6 +6,7 @@ import enum
 
 
 db_file = "sqlite:///pythonsqlite.db"
+# db_file = "sqlite:///:memory:shared"
 engine = create_engine(db_file)
 Base = declarative_base()
 
@@ -33,8 +34,8 @@ class OpenHours(Base):
     __tablename__ = 'open_hours'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(32))
-    week_day_begin = Column(Integer, Enum(WeekDays, values_callable=lambda x: [str(member.value) for member in WeekDays]))
-    week_day_end = Column(Integer, Enum(WeekDays, values_callable=lambda x: [str(member.value) for member in WeekDays]))
+    week_day_begin = Column(Integer)
+    week_day_end = Column(Integer)
     time_begin = Column(String(32))
     time_end = Column(String(32))
     restaurant = Column(Integer, ForeignKey("restaurant.id"), nullable=False)
