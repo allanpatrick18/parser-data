@@ -7,7 +7,8 @@ from rest_open_hours import database
 path, filename = os.path.split(os.path.realpath(__file__))
 import logging
 
-week_day = {member.name: str(member.value) for member in database.WeekDays}
+logging.basicConfig(level=logging.WARNING)
+week_day = {member.name: int(member.value) for member in database.WeekDays}
 
 
 def read_csv() -> typing.List:
@@ -86,8 +87,12 @@ def create_restaurant(name: str):
     """
 
     restaurant = database.Restaurant(name=name)
-    database.session.add(restaurant)
-    database.session.commit()
+    try:
+        database.session.add(restaurant)
+        database.session.commit()
+    except:
+        pass
+
     return restaurant
 
 
@@ -95,15 +100,18 @@ def insert_to_model(object_dict: dict, restaurant: database.Restaurant) -> None:
     """ Create a entire object """
     model = database.OpenHours()
     model.restaurant = restaurant.id
-    model.week_day_begin = object_dict['week_day_begin'].lower()
-    model.week_day_end = object_dict['week_day_end'].lower()
+    model.week_day_begin = week_day[object_dict['week_day_begin'].lower()]
+    model.week_day_end = week_day[object_dict['week_day_end'].lower()]
     model.time_begin = convert_to_time(object_dict['time_begin'])
     model.time_end = convert_to_time(object_dict['time_end'])
-    database.session.add(model)
-    database.session.commit()
+    try:
+        database.session.add(model)
+        database.session.commit()
+    except:
+        pass
 
 
-def query_open_restaurants(date_dt: datetime):
+def list_open_restaurants(date_dt: datetime):
     """
     Query que restaurants that open in the given date"
     :param date_dt:
@@ -122,8 +130,21 @@ def query_open_restaurants(date_dt: datetime):
               {week} BETWEEN hours.week_day_begin AND hours.week_day_end AND
               time('{time_start}') BETWEEN time(hours.time_begin) AND time(hours.time_end)"""
     result = conn.execute(stm)
+    response = []
     for ele in result.fetchall():
+        response.append(ele)
         logging.info(ele)
+    return response
+
+
+def query_open_hours():
+    """
+    Query que restaurants that open in the given date"
+    :param date_dt:
+    :return:
+    """
+
+    result = session.query(database.OpenHours).all()
     return result
 
 
