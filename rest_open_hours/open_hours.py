@@ -2,12 +2,13 @@ from rest_open_hours.database import session
 import os
 import csv
 import typing
+
 from datetime import datetime
 from rest_open_hours import database
 path, filename = os.path.split(os.path.realpath(__file__))
 import logging
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 week_day = {member.name: int(member.value) for member in database.WeekDays}
 
 
@@ -38,44 +39,45 @@ def convert_to_time(time_date: datetime) -> str:
     return str(time_date.time())
 
 
-def convert_open_range(open_range: str) -> dict:
+def convert_open_range(open_range: str) -> list:
     """
     This function is responsible to generate to extract the information
     begin, end time of restaurants are open and day of the week
     :param open_range:
     :return:
     """
+    week_days = dict()
     result = []
-    open_range = open_range.replace('-', ' ')
-    open_range = open_range.replace(',', ' ')
-    open_range = open_range.split(" ")
-    list_final = [x for x in open_range if x != '']
+    time_hours = []
+    list_spaced = open_range.split(" ")
+    for i in range(len(list_spaced)):
+        if list_spaced[i].lower() == 'pm':
+            time_hours.append(list_spaced[i - 1] + ' ' + 'PM')
+        if list_spaced[i].lower() == 'am':
+            time_hours.append(list_spaced[i - 1] + ' ' + 'AM')
 
+    open_range = open_range.replace(" ", "")
     index = 0
-    if len(list_final) < 6:
-        open_time = {'week_day_begin': list_final[0],
-                     'week_day_end': list_final[0],
-                     'time_begin': list_final[1] + ' ' + list_final[2].upper(),
-                     'time_end': list_final[-2] + ' ' + list_final[-1].upper()}
+    pos = 0
+    while pos < len(open_range):
+        if open_range[pos:pos+3].lower() in week_day:
+            if index not in week_days:
+                week_days[index] = []
+
+            week_days[index].append(open_range[pos:pos+3].lower())
+            if open_range[pos + 3] == ',':
+                index += 1
+        pos+=1
+
+    for k in week_days.keys():
+        p = 0
+        if len(week_days[k]) > 1:
+            p = 1
+        open_time = {'week_day_begin': week_days[k][0],
+                     'week_day_end': week_days[k][p],
+                     'time_begin': time_hours[0],
+                     'time_end': time_hours[1]}
         result.append(open_time)
-        logging.info(open_time)
-        return result
-
-    open_time = {'week_day_begin': list_final[0],
-                 'week_day_end': list_final[1]}
-    if "".join(list_final[2]).lower() in week_day:
-        open_time_2 = {'week_day_begin': list_final[2],
-                         'week_day_end': list_final[2],
-                         'time_begin': list_final[3] + ' ' + list_final[4].upper(),
-                         'time_end': list_final[-2] + ' ' + list_final[-1].upper()}
-        index = 1
-        result.append(open_time_2)
-        logging.info(open_time_2)
-
-    open_time['time_begin'] = list_final[2 + index] + ' ' + list_final[3 + index].upper()
-    open_time['time_end'] = list_final[-2] + ' ' + list_final[-1].upper()
-    result.append(open_time)
-    logging.info(open_time)
     return result
 
 
