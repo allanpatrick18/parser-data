@@ -38,6 +38,11 @@ class TestRestOpenHours(unittest.TestCase):
     def test_query_open(self):
         res = open_hours.query_open_hours()
         self.assertTrue(len(res) > 0)
+        
+    def test_query_new_time(self):
+        date_dt  = datetime.strptime("2022-01-03 10:30:00", '%Y-%M-%D HH:MM:SS')
+        res = open_hours.list_open_restaurants(date_dt)
+        self.assertTrue(len(res) > 0)
 
     def test_model_insert(self):
         model = database.OpenHours()
