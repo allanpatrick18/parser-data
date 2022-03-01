@@ -39,7 +39,7 @@ def convert_to_time(time_date: datetime) -> str:
     return str(time_date.time())
 
 
-def convert_open_range(open_range: str) -> dict:
+def convert_open_range(open_range: str) -> list:
     """
     This function is responsible to generate to extract the information
     begin, end time of restaurants are open and day of the week
@@ -78,7 +78,7 @@ def convert_open_range(open_range: str) -> dict:
                      'time_begin': time_hours[0],
                      'time_end': time_hours[1]}
         result.append(open_time)
-    return open_time
+    return result
 
 
 def create_restaurant(name: str):

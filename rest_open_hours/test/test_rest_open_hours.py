@@ -40,7 +40,9 @@ class TestRestOpenHours(unittest.TestCase):
         self.assertTrue(len(res) > 0)
         
     def test_query_new_time(self):
-        date_dt  = datetime.strptime("2022-01-03 10:30:00", '%Y-%M-%D HH:MM:SS')
+        date_string = "2022-03-01 10:50:10"
+        date_dt = datetime.fromisoformat(date_string)
+        print(date_dt)
         res = open_hours.list_open_restaurants(date_dt)
         self.assertTrue(len(res) > 0)
 
